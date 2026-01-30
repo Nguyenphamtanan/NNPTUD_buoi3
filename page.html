@@ -32,11 +32,18 @@
             background-color: #f4f4f4;
         }
 
+        /* Zebra rows: alternating black and white rows */
+        tr:nth-child(odd) {
+            background-color: #000;
+            color: #fff;
+        }
         tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #fff;
+            color: #000;
         }
         tr:hover {
-            background-color: #f1f1f1;
+            background-color: #444;
+            color: #fff;
         }
 
         .deleted {
@@ -105,18 +112,55 @@
         .actions .restore:hover {
             background-color: #e0a800;
         }
+        /* Product table image styling: show full image */
+        .product-img {
+            width: 120px;
+            height: 80px;
+            object-fit: cover;
+            display: block;
+            margin: 4px auto;
+            background: #eee;
+        }
+        td img { display:block; }
+        .controls { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+        .controls input[type="text"] { padding:6px; }
+        .controls select, .controls button { padding:6px 8px; }
+
+        /* Placeholder image styling */
+        img[alt="No image"] {
+            background-color: #ddd;
+            display: block;
+            width: 120px;
+            height: 80px;
+            text-align: center;
+            vertical-align: middle;
+        }
     </style>
     <script defer src="main.js"></script>
 </head>
 <body>
-    <h1>Manage Posts</h1>
+    <h1>Manage Products</h1>
+    <div class="controls">
+        <input id="product-search" type="text" placeholder="Search by title...">
+        <label>Show:
+            <select id="page-size">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+            </select>
+        </label>
+        <button id="sort-price">Sort Price ▲/▼</button>
+        <button id="sort-title">Sort Name A/Ž</button>
+    </div>
     <div>
         <table id="post-table">
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Image</th>
                     <th>Title</th>
-                    <th>Views</th>
+                    <th>Price</th>
+                    <th>Category</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -124,51 +168,14 @@
                 <!-- Posts content will be dynamically added here -->
             </tbody>
         </table>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div id="pagination-info"></div>
+            <div>
+                <button id="prev-page">Prev</button>
+                <button id="next-page">Next</button>
+            </div>
+        </div>
     </div>
-
-    <div style="margin-top: 20px;">
-        <h3>Add/Edit Post</h3>
-        <form id="post-form">
-            <label for="title_txt">Title:</label>
-            <input type="text" id="title_txt" placeholder="Enter Title">
-            
-            <label for="views_txt">Views:</label>
-            <input type="number" id="views_txt" placeholder="Enter Views">
-            
-            <input type="submit" value="Save">
-        </form>
-    </div>
-
-    <hr>
-
-    <h1>Manage Comments</h1>
-    <div>
-        <table id="comment-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Comment</th>
-                    <th>Post ID</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="comment-body">
-                <!-- Comment content will be dynamically added here -->
-            </tbody>
-        </table>
-    </div>
-
-    <div style="margin-top: 20px;">
-        <h3>Add Comment</h3>
-        <form id="comment-form">
-            <label for="comment_text">Comment Text:</label>
-            <input type="text" id="comment_text" placeholder="Enter Comment">
-            
-            <label for="comment_postId">Post ID:</label>
-            <input type="text" id="comment_postId" placeholder="Enter Post ID">
-            
-            <input type="submit" value="Add Comment">
-        </form>
-    </div>
+    <!-- Ensure your products include valid images in the dataset -->
 </body>
 </html>

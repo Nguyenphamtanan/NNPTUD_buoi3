@@ -1,117 +1,136 @@
 document.addEventListener('DOMContentLoaded', () => {
-    LoadData();        // Load posts khi trang được tải
-    LoadComments();    // Load comments khi trang được tải
+    LoadProducts();    // Load products for the management table
+    LoadComments();    // Load comments when the page is loaded
 
-    // Gắn sự kiện form cho Posts
-    const postForm = document.getElementById('post-form');
-    postForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        saveData(); // Thêm/sửa Posts
-    });
+    // Product controls events
+    const searchInput = document.getElementById('product-search');
+    const pageSizeSelect = document.getElementById('page-size');
+    const sortPriceBtn = document.getElementById('sort-price');
+    const sortTitleBtn = document.getElementById('sort-title');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
 
-    // Gắn sự kiện form cho Comments
-    const commentForm = document.getElementById('comment-form');
-    commentForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        AddComment(); // Thêm Comments
-    });
+    if (searchInput) searchInput.addEventListener('input', (e) => onSearchChange(e.target.value));
+    if (pageSizeSelect) pageSizeSelect.addEventListener('change', (e) => onPageSizeChange(parseInt(e.target.value)));
+    if (sortPriceBtn) sortPriceBtn.addEventListener('click', () => toggleSort('price'));
+    if (sortTitleBtn) sortTitleBtn.addEventListener('click', () => toggleSort('title'));
+    if (prevBtn) prevBtn.addEventListener('click', () => changePage(currentPage - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => { changePage(currentPage + 1); });
 });
 
-async function LoadData() {
+let products = [];
+let filteredProducts = [];
+let currentPage = 1;
+let pageSize = 10;
+let sortState = { field: null, asc: true };
+
+// Fetch all products from the Escuelajs API
+async function LoadProducts() {
     try {
-        let res = await fetch('http://localhost:3000/posts');
-        let posts = await res.json();
-        let body = document.getElementById('post-body');
-        body.innerHTML = ""; // Làm sạch danh sách trước khi hiển thị lại
-
-        for (const post of posts) {
-            body.innerHTML += convertDataToHTML(post);
-        }
+        const response = await fetch('https://api.escuelajs.co/api/v1/products');
+        if (!response.ok) throw new Error(`Failed to fetch products: ${response.status}`);
+        products = await response.json();
+        filteredProducts = products.slice();
+        currentPage = 1;
+        renderProducts();
     } catch (error) {
-        console.error('Error loading posts:', error);
+        console.error('Error while fetching products from API:', error);
     }
 }
 
-function convertDataToHTML(post) {
-    let isDeletedStyle = post.isDeleted ? 'text-decoration: line-through;' : '';
-    let deleteButton = post.isDeleted
-        ? ''
-        : `<button onclick="Delete(${post.id})">Delete</button>`;
+function renderProducts() {
+    const body = document.getElementById('post-body');
+    if (!body) return;
 
-    return `<tr>
-        <td style="${isDeletedStyle}">${post.id}</td>
-        <td style="${isDeletedStyle}">${post.title}</td>
-        <td style="${isDeletedStyle}">${post.views}</td>
-        <td>${deleteButton}</td>
-    </tr>`;
+    // Sort filtered products if necessary
+    let list = [...filteredProducts];
+    if (sortState.field) {
+        list.sort((a, b) => {
+            const valueA = `${a[sortState.field]}`.toLowerCase();
+            const valueB = `${b[sortState.field]}`.toLowerCase();
+            if (sortState.asc) return valueA > valueB ? 1 : -1;
+            else return valueA < valueB ? 1 : -1;
+        });
+    }
+
+    // Apply pagination
+    const startIndex = (currentPage - 1) * pageSize;
+    const paginatedProducts = list.slice(startIndex, startIndex + pageSize);
+    const totalPageCount = Math.ceil(list.length / pageSize);
+
+    // Clear current table content
+    body.innerHTML = '';
+
+    // Render products in the table
+    for (const product of paginatedProducts) {
+        const imageSrc = Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : getPlaceholderImage();
+        const categoryName = product.category?.name ? product.category.name : 'N/A';
+
+        body.innerHTML += `
+            <tr>
+                <td>${product.id}</td>
+                <td><img class="product-img" src="${imageSrc}" alt="${escapeHtml(product.title)}"></td>
+                <td>${escapeHtml(product.title)}</td>
+                <td>$${product.price.toFixed(2)}</td>
+                <td>${escapeHtml(categoryName)}</td>
+                <td>
+                    <button onclick="openEditProduct('${product.id}')">Edit</button>
+                    <button onclick="LoadProductComments('${product.id}')">Comments</button>
+                </td>
+            </tr>`;
+    }
+
+    // Update pagination details
+    const paginationInfo = document.getElementById('pagination-info');
+    if (paginationInfo) paginationInfo.textContent = `Page ${currentPage} of ${totalPageCount}`;
 }
 
-async function saveData() {
-    let title = document.getElementById("title_txt").value;
-    let view = document.getElementById('views_txt').value;
+// Handle search input
+function onSearchChange(query) {
+    filteredProducts = products.filter(p => p.title.toLowerCase().includes(query.trim().toLowerCase()));
+    currentPage = 1;
+    renderProducts();
+}
 
-    let resGET = await fetch('http://localhost:3000/posts');
-    if (!resGET.ok) {
-        console.error("Failed to fetch existing posts.");
-        return false;
-    }
-    let posts = await resGET.json();
-    let maxId = Math.max(0, ...posts.map(post => parseInt(post.id))) || 0;
-    let id = (maxId + 1).toString();
+// Change the page size and re-render the product table
+function onPageSizeChange(size) {
+    pageSize = size;
+    currentPage = 1;
+    renderProducts();
+}
 
-    let resPOST = await fetch('http://localhost:3000/posts', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            id: id,
-            title: title,
-            views: view,
-            isDeleted: false,
-        }),
-    });
+// Change to a new page
+function changePage(newPage) {
+    const totalPages = Math.ceil(filteredProducts.length / pageSize);
+    if (newPage < 1 || newPage > totalPages) return;
+    currentPage = newPage;
+    renderProducts();
+}
 
-    if (resPOST.ok) {
-        console.log("Post created successfully.");
-        LoadData();
+// Toggle sorting (price or title)
+function toggleSort(field) {
+    if (sortState.field === field) {
+        sortState.asc = !sortState.asc;
     } else {
-        console.error("Failed to create post.");
+        sortState.field = field;
+        sortState.asc = true;
     }
+    renderProducts();
 }
 
-async function Delete(id) {
-    let resPATCH = await fetch(`http://localhost:3000/posts/${id}`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            isDeleted: true,
-        }),
-    });
-
-    if (resPATCH.ok) {
-        console.log("Post deleted successfully.");
-        LoadData();
-    } else {
-        console.error("Failed to delete post.");
-    }
-}
-
+// Load comments from API
 async function LoadComments() {
     try {
-        let res = await fetch('http://localhost:3000/comments');
-        let comments = await res.json();
-        let commentBody = document.getElementById('comment-body');
-        commentBody.innerHTML = ""; // Làm sạch danh sách trước khi hiển thị lại
+        const res = await fetch('http://localhost:3000/comments');
+        const comments = await res.json();
+        const commentBody = document.getElementById('comment-body');
+        commentBody.innerHTML = '';
 
         for (const comment of comments) {
-            let isDeletedStyle = comment.isDeleted ? 'text-decoration: line-through;' : '';
-            let deleteButton = comment.isDeleted
-                ? '' // Không hiển thị nút Delete nếu đã xóa mềm
+            const isDeletedStyle = comment.isDeleted ? 'text-decoration: line-through;' : '';
+            const deleteButton = comment.isDeleted
+                ? ''
                 : `<button onclick="DeleteComment('${comment.id}')">Delete</button>`;
-
             commentBody.innerHTML += `
                 <tr>
                     <td style="${isDeletedStyle}">${comment.id}</td>
@@ -121,59 +140,73 @@ async function LoadComments() {
                 </tr>`;
         }
     } catch (error) {
-        console.error("Error loading comments:", error);
+        console.error('Error loading comments:', error);
     }
 }
 
+// Add a new comment
 async function AddComment() {
-    let commentText = document.getElementById('comment_text').value;
-    let postId = document.getElementById('comment_postId').value;
+    const commentText = document.getElementById('comment_text').value;
+    const postId = document.getElementById('comment_postId').value;
 
     if (!commentText || !postId) {
-        alert("Vui lòng nhập đầy đủ thông tin!");
+        alert('Please fill in all required fields!');
         return;
     }
 
-    let resGET = await fetch('http://localhost:3000/comments');
-    let comments = await resGET.json();
-    let maxId = Math.max(0, ...comments.map(comment => parseInt(comment.id))) || 0;
-    let newId = (maxId + 1).toString();
+    try {
+        const res = await fetch('http://localhost:3000/comments');
+        const comments = await res.json();
+        const maxId = Math.max(0, ...comments.map(c => parseInt(c.id, 10))) || 0;
 
-    let resPOST = await fetch('http://localhost:3000/comments', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            id: newId,
-            text: commentText,
-            postId: postId,
-        }),
-    });
+        const response = await fetch('http://localhost:3000/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: maxId + 1,
+                text: commentText,
+                postId: postId,
+            }),
+        });
 
-    if (resPOST.ok) {
-        console.log("Comment added successfully.");
-        LoadComments();
-    } else {
-        console.error("Failed to add comment.");
+        if (response.ok) {
+            document.getElementById('comment_text').value = '';
+            LoadComments();
+        } else {
+            console.error('Failed to add comment.');
+        }
+    } catch (error) {
+        console.error('Error adding comment:', error);
     }
 }
 
+// Delete a comment
 async function DeleteComment(id) {
-    let resPATCH = await fetch(`http://localhost:3000/comments/${id}`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            isDeleted: true, // Xóa mềm (set isDeleted thành true)
-        }),
-    });
+    try {
+        const response = await fetch(`http://localhost:3000/comments/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isDeleted: true }),
+        });
 
-    if (resPATCH.ok) {
-        console.log("Comment marked as deleted.");
-        LoadComments(); // Tải lại danh sách comments sau khi cập nhật
-    } else {
-        console.error("Failed to delete comment.");
+        if (response.ok) {
+            console.log('Comment deleted successfully.');
+            LoadComments();
+        } else {
+            console.error('Failed to delete comment.');
+        }
+    } catch (error) {
+        console.error('Error deleting comment:', error);
     }
+}
+
+function getPlaceholderImage() {
+    return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="100%" height="100%" fill="#ddd"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#666" font-size="12">No Image</text></svg>';
+}
+
+// Utility function to escape HTML content
+function escapeHtml(str) {
+    return str
+        ? str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
+        : '';
 }

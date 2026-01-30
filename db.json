@@ -1,65 +1,78 @@
 {
   "posts": [
     {
-      "id": "1",
-      "title": "a title",
-      "views": 100,
-      "isDeleted": false
+      "id": 6,
+      "title": "Classic Comfort Fit Joggers",
+      "slug": "classic-comfort-fit-joggers",
+      "price": 25,
+      "description": "Discover the perfect blend of style and comfort with our Classic Comfort Fit Joggers. These versatile black joggers feature a soft elastic waistband with an adjustable drawstring, two side pockets, and ribbed ankle cuffs for a secure fit. Made from a lightweight and durable fabric, they are ideal for both active days and relaxed lounging.",
+      "category": {
+        "id": 1,
+        "name": "Este es el nuevo nombre del producto",
+        "slug": "este-es-el-nuevo-nombre-del-producto",
+        "image": "https://i.imgur.com/QkIa5tT.jpeg",
+        "creationAt": "2026-01-29T17:42:51.000Z",
+        "updatedAt": "2026-01-29T21:40:37.000Z"
+      },
+      "images": [
+        "https://i.imgur.com/ZKGofuB.jpeg",
+        "https://i.imgur.com/GJi73H0.jpeg",
+        "https://i.imgur.com/633Fqrz.jpeg"
+      ],
+      "creationAt": "2026-01-29T17:42:51.000Z",
+      "updatedAt": "2026-01-29T17:42:51.000Z"
     },
     {
-      "title": "hello",
-      "views": "20",
-      "id": "2"
+      "id": 14,
+      "title": "Classic High-Waisted Athletic Shorts",
+      "slug": "classic-high-waisted-athletic-shorts",
+      "price": 43,
+      "description": "Stay comfortable and stylish with our Classic High-Waisted Athletic Shorts. Designed for optimal movement and versatility, these shorts are a must-have for your workout wardrobe. Featuring a figure-flattering high waist, breathable fabric, and a secure fit that ensures they stay in place during any activity, these shorts are perfect for the gym, running, or even just casual wear.",
+      "category": {
+        "id": 1,
+        "name": "Este es el nuevo nombre del producto",
+        "slug": "este-es-el-nuevo-nombre-del-producto",
+        "image": "https://i.imgur.com/QkIa5tT.jpeg",
+        "creationAt": "2026-01-29T17:42:51.000Z",
+        "updatedAt": "2026-01-29T21:40:37.000Z"
+      },
+      "images": [
+        "https://i.imgur.com/eGOUveI.jpeg",
+        "https://i.imgur.com/UcsGO7E.jpeg",
+        "https://i.imgur.com/NLn4e7S.jpeg"
+      ],
+      "creationAt": "2026-01-29T17:42:51.000Z",
+      "updatedAt": "2026-01-29T17:42:51.000Z"
     },
     {
-      "title": "haha",
-      "views": "213",
-      "id": "3"
-    },
-    {
-      "title": "haha",
-      "views": "23",
-      "id": "4",
-      "isDeleted": true
-    },
-    {
-      "id": "5",
-      "title": "heheheehhe",
-      "views": "2000",
-      "isDeleted": true
-    },
-    {
-      "id": "6",
-      "title": "an",
-      "views": "80",
-      "isDeleted": false
-    },
-    {
-      "id": "7",
-      "title": "an",
-      "views": "3",
-      "isDeleted": false
+      "id": 15,
+      "title": "Classic White Crew Neck T-Shirt",
+      "slug": "classic-white-crew-neck-t-shirt",
+      "price": 39,
+      "description": "Elevate your basics with this versatile white crew neck tee. Made from a soft, breathable cotton blend, it offers both comfort and durability. Its sleek, timeless design ensures it pairs well with virtually any outfit. Ideal for layering or wearing on its own, this t-shirt is a must-have staple for every wardrobe.",
+      "category": {
+        "id": 1,
+        "name": "Este es el nuevo nombre del producto",
+        "slug": "este-es-el-nuevo-nombre-del-producto",
+        "image": "https://i.imgur.com/QkIa5tT.jpeg",
+        "creationAt": "2026-01-29T17:42:51.000Z",
+        "updatedAt": "2026-01-29T21:40:37.000Z"
+      },
+      "images": [
+        "https://i.imgur.com/axsyGpD.jpeg",
+        "https://i.imgur.com/T8oq9X2.jpeg",
+        "https://i.imgur.com/J6MinJn.jpeg"
+      ],
+      "creationAt": "2026-01-29T17:42:51.000Z",
+      "updatedAt": "2026-01-29T17:42:51.000Z"
     }
+    
   ],
-  "comments": [
+  "productComments": [
     {
-      "id": "1",
-      "text": "a comment about post 1",
-      "postId": "1"
-    },
-    {
-      "id": "2",
-      "text": "another comment about post 1",
-      "postId": "1"
-    },
-    {
-      "id": "3",
-      "text": "hello",
-      "postId": "1",
-      "isDeleted": false
+      "id": 1,
+      "productId": 6,
+      "text": "Nice joggers, very comfortable!"
     }
-  ],
-  "profile": {
-    "name": "typicode"
-  }
+  ]
 }
